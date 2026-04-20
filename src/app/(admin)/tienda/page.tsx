@@ -1,11 +1,18 @@
 'use client'
 
-import { useState } from 'react'
-import Link from 'next/link'
+import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import {
-  Eye, Palette, ExternalLink, Globe, Layout, Settings,
-  Check, X, Lock, FileText,
+  Eye, Palette, Globe, FileText, Settings, Link2,
+  Check, Lock, X, ExternalLink,
 } from 'lucide-react'
+import { createClient } from '@/lib/supabase/client'
+import OpticaEsencial from '@/components/templates/OpticaEsencial'
+import ClinicaConfianza from '@/components/templates/ClinicaConfianza'
+import LensShop from '@/components/templates/LensShop'
+import VisionPro from '@/components/templates/VisionPro'
+import LuxOptic from '@/components/templates/LuxOptic'
+import MedCenterPro from '@/components/templates/MedCenterPro'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -14,291 +21,129 @@ interface Plantilla {
   nombre: string
   descripcion: string
   precio: 'gratis' | 'premium'
-  color: string
-  accent: string
-  headerBg: string
+  gradient: string
+  accentColor: string
+  textColor: string
 }
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
 
 const PLANTILLAS: Plantilla[] = [
   {
-    id: 'optica-esencial',
+    id: 'esencial',
     nombre: 'Óptica Esencial',
-    descripcion: 'Ecommerce tradicional minimalista, fondo blanco, acentos verdes #00a651, alta conversión.',
+    descripcion: 'Ecommerce minimalista, fondo blanco, acentos verdes, alta conversión.',
     precio: 'gratis',
-    color: '#f0fdf4',
-    accent: '#00a651',
-    headerBg: '#00a651',
+    gradient: 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 40%, #86efac 100%)',
+    accentColor: '#00a651',
+    textColor: '#14532d',
   },
   {
-    id: 'clinica-confianza',
+    id: 'clinica',
     nombre: 'Clínica Confianza',
-    descripcion: 'Clínica oftalmológica profesional, azul médico #1e40af, tipografía serif, máxima confianza.',
+    descripcion: 'Clínica oftalmológica profesional, azul médico, tipografía serif.',
     precio: 'gratis',
-    color: '#eff6ff',
-    accent: '#1e40af',
-    headerBg: '#1e40af',
+    gradient: 'linear-gradient(135deg, #eff6ff 0%, #dbeafe 40%, #93c5fd 100%)',
+    accentColor: '#1e40af',
+    textColor: '#1e3a8a',
   },
   {
     id: 'lensshop',
     nombre: 'LensShop',
-    descripcion: 'Ecommerce premium oscuro, negro y dorado #c9a84c, lookbook editorial, scroll horizontal.',
+    descripcion: 'Premium oscuro, negro y dorado editorial, lookbook integrado.',
     precio: 'gratis',
-    color: '#111',
-    accent: '#c9a84c',
-    headerBg: '#0a0a0a',
+    gradient: 'linear-gradient(135deg, #111827 0%, #1f2937 40%, #374151 100%)',
+    accentColor: '#c9a84c',
+    textColor: '#c9a84c',
   },
   {
     id: 'visionpro',
     nombre: 'VisionPro',
-    descripcion: 'UX premium minimalista, blanco puro con azul eléctrico #0066ff, tipografía display impactante.',
+    descripcion: 'UX premium minimalista, blanco puro con azul eléctrico impactante.',
     precio: 'premium',
-    color: '#f8f8f8',
-    accent: '#0066ff',
-    headerBg: '#ffffff',
+    gradient: 'linear-gradient(135deg, #f8fafc 0%, #e0f2fe 50%, #0066ff22 100%)',
+    accentColor: '#0066ff',
+    textColor: '#0066ff',
   },
   {
     id: 'luxoptic',
     nombre: 'LuxOptic',
-    descripcion: 'Estilo Ray-Ban/Oakley, negro absoluto con rojo #e63946, bold industrial, totalmente oscuro.',
+    descripcion: 'Estilo Ray-Ban/Oakley, negro absoluto con rojo, bold industrial.',
     precio: 'premium',
-    color: '#000',
-    accent: '#e63946',
-    headerBg: '#000000',
+    gradient: 'linear-gradient(135deg, #0a0a0a 0%, #1a0505 50%, #2d0a0a 100%)',
+    accentColor: '#e63946',
+    textColor: '#e63946',
   },
   {
-    id: 'medcenter-pro',
+    id: 'medcenter',
     nombre: 'MedCenter Pro',
-    descripcion: 'Corporativo institucional, azul #003366, mega menú, estadísticas, ideal para clínicas grandes.',
+    descripcion: 'Corporativo institucional, azul profundo, para clínicas grandes.',
     precio: 'premium',
-    color: '#eaf0fa',
-    accent: '#003366',
-    headerBg: '#003366',
+    gradient: 'linear-gradient(135deg, #eaf0fa 0%, #c7d7f0 40%, #7ba7d9 100%)',
+    accentColor: '#003366',
+    textColor: '#003366',
   },
 ]
 
-// ─── Payment modal ────────────────────────────────────────────────────────────
+// ─── Template renderer ────────────────────────────────────────────────────────
 
-function ModalPago({ plantilla, onClose, onSuccess }: { plantilla: Plantilla; onClose: () => void; onSuccess: () => void }) {
-  const [step, setStep] = useState<'form' | 'success'>('form')
-  const [form, setForm] = useState({ nombre: '', email: '', card: '', expiry: '', cvv: '' })
-
-  if (step === 'success') {
-    return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-        <div className="w-full max-w-md rounded-2xl bg-white shadow-2xl p-8 text-center">
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-[#dcfce7]">
-            <Check className="h-7 w-7 text-[#166534]" />
-          </div>
-          <h3 className="text-lg font-semibold text-[#1a1a1a] mb-2">¡Pago exitoso!</h3>
-          <p className="text-sm text-[#6a6a6a] mb-6">
-            La plantilla <strong>{plantilla.nombre}</strong> ha sido activada.
-          </p>
-          <button onClick={onSuccess} className="w-full rounded-lg bg-[#1a1a1a] py-2.5 text-sm font-medium text-white">
-            Continuar
-          </button>
-        </div>
-      </div>
-    )
+function renderTemplate(id: string) {
+  const props = { nombreTienda: 'OftalShop Demo' }
+  switch (id) {
+    case 'esencial':     return <OpticaEsencial {...props} />
+    case 'clinica':      return <ClinicaConfianza {...props} />
+    case 'lensshop':     return <LensShop {...props} />
+    case 'visionpro':    return <VisionPro {...props} />
+    case 'luxoptic':     return <LuxOptic {...props} />
+    case 'medcenter':    return <MedCenterPro {...props} />
+    default:             return <OpticaEsencial {...props} />
   }
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="w-full max-w-md rounded-2xl bg-white shadow-2xl">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-[#f1f1f1]">
-          <h3 className="text-base font-semibold text-[#1a1a1a]">Comprar {plantilla.nombre}</h3>
-          <button onClick={onClose} className="text-[#8a8a8a] hover:text-[#1a1a1a]"><X className="h-5 w-5" /></button>
-        </div>
-        <div className="px-6 py-5 space-y-4">
-          <div className="rounded-xl bg-[#fafafa] border border-[#e1e1e1] p-4 flex items-center justify-between">
-            <div>
-              <p className="text-sm font-semibold text-[#1a1a1a]">{plantilla.nombre}</p>
-              <p className="text-xs text-[#6a6a6a]">Licencia vitalicia · 1 tienda</p>
-            </div>
-            <p className="text-lg font-bold text-[#1a1a1a]">S/ 65</p>
-          </div>
-          {(['nombre', 'email'] as const).map((k) => (
-            <div key={k}>
-              <label className="block text-xs text-[#6a6a6a] mb-1.5">{k === 'nombre' ? 'Nombre completo' : 'Email'}</label>
-              <input
-                className="w-full rounded-lg border border-[#e1e1e1] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#2a9d8f]"
-                type={k === 'email' ? 'email' : 'text'}
-                value={form[k]}
-                onChange={(e) => setForm((p) => ({ ...p, [k]: e.target.value }))}
-                placeholder={k === 'nombre' ? 'Ana García' : 'ana@correo.com'}
-              />
-            </div>
-          ))}
-          <div>
-            <label className="block text-xs text-[#6a6a6a] mb-1.5">Número de tarjeta</label>
-            <input className="w-full rounded-lg border border-[#e1e1e1] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#2a9d8f]" value={form.card} onChange={(e) => setForm((p) => ({ ...p, card: e.target.value }))} placeholder="4242 4242 4242 4242" maxLength={19} />
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-xs text-[#6a6a6a] mb-1.5">Vencimiento</label>
-              <input className="w-full rounded-lg border border-[#e1e1e1] px-3 py-2 text-sm focus:outline-none" value={form.expiry} onChange={(e) => setForm((p) => ({ ...p, expiry: e.target.value }))} placeholder="MM/AA" maxLength={5} />
-            </div>
-            <div>
-              <label className="block text-xs text-[#6a6a6a] mb-1.5">CVV</label>
-              <input className="w-full rounded-lg border border-[#e1e1e1] px-3 py-2 text-sm focus:outline-none" value={form.cvv} onChange={(e) => setForm((p) => ({ ...p, cvv: e.target.value }))} placeholder="123" maxLength={4} />
-            </div>
-          </div>
-        </div>
-        <div className="px-6 pb-6">
-          <button onClick={() => setStep('success')} className="w-full rounded-lg bg-[#1a1a1a] py-2.5 text-sm font-semibold text-white hover:bg-[#2a2a2a]">
-            Pagar S/ 65
-          </button>
-          <p className="text-center text-xs text-[#8a8a8a] mt-3">Pago seguro · Licencia vitalicia</p>
-        </div>
-      </div>
-    </div>
-  )
 }
 
-// ─── Vista previa modal ───────────────────────────────────────────────────────
+// ─── Modal preview ────────────────────────────────────────────────────────────
 
 function ModalPreview({ plantilla, onClose }: { plantilla: Plantilla; onClose: () => void }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-      <div className="w-full max-w-2xl rounded-2xl bg-white shadow-2xl overflow-hidden flex flex-col" style={{ maxHeight: '90vh' }}>
-        <div className="flex items-center justify-between px-5 py-3 border-b border-[#f1f1f1]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+      <div className="w-full max-w-5xl max-h-[90vh] flex flex-col rounded-2xl bg-white shadow-2xl overflow-hidden">
+        <div className="flex items-center justify-between px-5 py-3 border-b border-[#f1f1f1] shrink-0">
           <p className="text-sm font-semibold text-[#1a1a1a]">Vista previa — {plantilla.nombre}</p>
-          <button onClick={onClose} className="text-[#8a8a8a] hover:text-[#1a1a1a]"><X className="h-5 w-5" /></button>
+          <button onClick={onClose} className="rounded-lg p-1.5 text-[#6a6a6a] hover:bg-[#f1f1f1]">
+            <X className="h-4 w-4" />
+          </button>
         </div>
-        <div className="flex-1 overflow-hidden" style={{ backgroundColor: plantilla.color }}>
-          {/* Mini-preview of the template */}
-          <div className="h-full flex flex-col">
-            <div className="h-10 flex items-center px-4 gap-3" style={{ backgroundColor: plantilla.headerBg }}>
-              <div className="h-4 w-16 rounded" style={{ backgroundColor: plantilla.accent + 'aa' }} />
-              <div className="h-2 w-8 rounded bg-white/20" />
-              <div className="h-2 w-8 rounded bg-white/20" />
-              <div className="h-2 w-8 rounded bg-white/20" />
-              <div className="ml-auto h-5 w-16 rounded-full" style={{ backgroundColor: plantilla.accent }} />
-            </div>
-            <div className="flex-1 p-6 space-y-4">
-              <div className="rounded-xl overflow-hidden" style={{ backgroundColor: plantilla.accent + '22' }}>
-                <div className="p-8 text-center space-y-2">
-                  <div className="h-6 w-32 rounded mx-auto" style={{ backgroundColor: plantilla.accent }} />
-                  <div className="h-3 w-48 rounded mx-auto bg-[#1a1a1a]/15" />
-                  <div className="h-3 w-40 rounded mx-auto bg-[#1a1a1a]/10" />
-                  <div className="h-8 w-28 rounded-full mx-auto mt-3" style={{ backgroundColor: plantilla.accent }} />
-                </div>
-              </div>
-              <div className="grid grid-cols-4 gap-2">
-                {[1, 2, 3, 4].map(i => (
-                  <div key={i} className="rounded-lg overflow-hidden border border-[#e1e1e1] bg-white">
-                    <div className="h-14" style={{ backgroundColor: plantilla.accent + '18' }} />
-                    <div className="p-2 space-y-1">
-                      <div className="h-2 rounded bg-[#1a1a1a]/10" />
-                      <div className="h-2 rounded w-2/3" style={{ backgroundColor: plantilla.accent + '60' }} />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
+        <div className="flex-1 overflow-y-auto">
+          {renderTemplate(plantilla.id)}
         </div>
       </div>
     </div>
   )
 }
 
-// ─── Plantilla thumbnail ──────────────────────────────────────────────────────
+// ─── Modal payment ────────────────────────────────────────────────────────────
 
-function PlantillaThumbnail({ plantilla }: { plantilla: Plantilla }) {
+function ModalPago({ plantilla, onClose, onBuy }: { plantilla: Plantilla; onClose: () => void; onBuy: () => void }) {
   return (
-    <div className="h-44 w-full overflow-hidden flex flex-col" style={{ backgroundColor: plantilla.color }}>
-      {/* Header */}
-      <div className="h-8 flex items-center px-3 gap-2 shrink-0" style={{ backgroundColor: plantilla.headerBg }}>
-        <div className="h-3 w-10 rounded-sm" style={{ backgroundColor: plantilla.accent + 'cc' }} />
-        <div className="h-1.5 w-5 rounded bg-white/20" />
-        <div className="h-1.5 w-5 rounded bg-white/20" />
-        <div className="h-1.5 w-5 rounded bg-white/20" />
-        <div className="ml-auto h-4 w-10 rounded-full" style={{ backgroundColor: plantilla.accent }} />
-      </div>
-      {/* Hero */}
-      <div className="px-3 py-3 flex-1" style={{ backgroundColor: plantilla.accent + '22' }}>
-        <div className="h-3 w-20 rounded mb-1" style={{ backgroundColor: plantilla.accent }} />
-        <div className="h-2 w-28 rounded mb-1 bg-[#1a1a1a]/15" />
-        <div className="h-2 w-20 rounded mb-3 bg-[#1a1a1a]/10" />
-        <div className="h-5 w-14 rounded-full" style={{ backgroundColor: plantilla.accent }} />
-      </div>
-      {/* Products grid */}
-      <div className="flex gap-1 px-3 pb-2 mt-1 shrink-0">
-        {[1, 2, 3, 4].map(i => (
-          <div key={i} className="flex-1 rounded overflow-hidden border border-black/5 bg-white/70">
-            <div className="h-6" style={{ backgroundColor: plantilla.accent + '20' }} />
-            <div className="p-1 space-y-0.5">
-              <div className="h-1 rounded bg-[#1a1a1a]/10 w-full" />
-              <div className="h-1 rounded w-2/3" style={{ backgroundColor: plantilla.accent + '60' }} />
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  )
-}
-
-// ─── Plantilla card ───────────────────────────────────────────────────────────
-
-function PlantillaCard({
-  plantilla, activa, onUsar, onComprar, onPreview,
-}: {
-  plantilla: Plantilla
-  activa: boolean
-  onUsar: () => void
-  onComprar: () => void
-  onPreview: () => void
-}) {
-  const isPremium = plantilla.precio === 'premium'
-
-  return (
-    <div className={`rounded-xl border-2 bg-white shadow-sm overflow-hidden transition-all ${activa ? 'border-[#2a9d8f]' : 'border-[#e1e1e1] hover:border-[#c9c9c9]'}`}>
-      <div className="relative">
-        <PlantillaThumbnail plantilla={plantilla} />
-        {activa && (
-          <div className="absolute top-2 right-2 flex h-6 w-6 items-center justify-center rounded-full bg-[#2a9d8f]">
-            <Check className="h-3.5 w-3.5 text-white" />
-          </div>
-        )}
-        <div className="absolute top-2 left-2 flex items-center gap-1.5">
-          {isPremium ? (
-            <span className="flex items-center gap-1 text-[10px] bg-[#1a1a1a] text-white px-2 py-0.5 rounded-full font-medium">
-              <Lock className="h-2.5 w-2.5" /> Premium
-            </span>
-          ) : (
-            <span className="text-[10px] bg-[#dcfce7] text-[#166534] px-2 py-0.5 rounded-full font-medium">
-              Gratis
-            </span>
-          )}
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+      <div className="w-full max-w-sm rounded-2xl bg-white shadow-2xl p-6 text-center">
+        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-[#fef9c3]">
+          <Lock className="h-7 w-7 text-[#854d0e]" />
         </div>
-        <button
-          onClick={onPreview}
-          className="absolute bottom-2 right-2 flex items-center gap-1 bg-black/60 text-white text-[10px] px-2.5 py-1 rounded-full hover:bg-black/80 transition-colors"
-        >
-          <Eye className="h-3 w-3" /> Preview
+        <h3 className="text-base font-semibold text-[#1a1a1a] mb-1">Plantilla Premium</h3>
+        <p className="text-sm text-[#6a6a6a] mb-5">
+          <strong>{plantilla.nombre}</strong> es una plantilla premium.<br />
+          Licencia vitalicia · 1 tienda
+        </p>
+        <div className="flex items-center justify-between bg-[#fafafa] rounded-xl border border-[#e1e1e1] px-4 py-3 mb-5">
+          <span className="text-sm font-semibold">{plantilla.nombre}</span>
+          <span className="text-xl font-black">S/ 65</span>
+        </div>
+        <button onClick={onBuy} className="w-full rounded-lg bg-[#1a1a1a] py-2.5 text-sm font-semibold text-white mb-2">
+          Pagar S/ 65
         </button>
-      </div>
-      <div className="p-4">
-        <h3 className="text-sm font-semibold text-[#1a1a1a]">{plantilla.nombre}</h3>
-        <p className="text-xs text-[#6a6a6a] mt-0.5 mb-3 line-clamp-2">{plantilla.descripcion}</p>
-        {activa ? (
-          <div className="flex gap-2">
-            <span className="flex-1 rounded-lg bg-[#f0fdf9] border border-[#2a9d8f] py-1.5 text-xs font-medium text-[#2a9d8f] text-center">Activa</span>
-            <Link href="/tienda/personalizar" className="flex-1 rounded-lg bg-[#1a1a1a] py-1.5 text-xs font-medium text-white text-center hover:bg-[#2a2a2a] transition-colors">
-              Personalizar
-            </Link>
-          </div>
-        ) : isPremium ? (
-          <button onClick={onComprar} className="w-full rounded-lg bg-[#1a1a1a] py-1.5 text-xs font-semibold text-white hover:bg-[#2a2a2a] transition-colors">
-            Comprar S/65
-          </button>
-        ) : (
-          <button onClick={onUsar} className="w-full rounded-lg border border-[#e1e1e1] py-1.5 text-xs font-medium text-[#1a1a1a] hover:bg-[#f7f7f7] transition-colors">
-            Usar plantilla
-          </button>
-        )}
+        <button onClick={onClose} className="w-full rounded-lg border border-[#e1e1e1] py-2.5 text-sm text-[#6a6a6a]">
+          Cancelar
+        </button>
       </div>
     </div>
   )
@@ -307,155 +152,204 @@ function PlantillaCard({
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function TiendaPage() {
-  const [nombreTema, setNombreTema] = useState('Óptica Esencial')
-  const [editandoNombre, setEditandoNombre] = useState(false)
-  const [tempNombre, setTempNombre] = useState(nombreTema)
-  const [plantillaActiva, setPlantillaActiva] = useState('optica-esencial')
-  const [modalPago, setModalPago] = useState<Plantilla | null>(null)
-  const [modalPreview, setModalPreview] = useState<Plantilla | null>(null)
+  const router = useRouter()
+  const [plantillaActiva, setPlantillaActiva] = useState('esencial')
+  const [preview, setPreview] = useState<Plantilla | null>(null)
+  const [pago, setPago] = useState<Plantilla | null>(null)
+  const [saving, setSaving] = useState(false)
+  const [savedId, setSavedId] = useState<string | null>(null)
 
-  function confirmarNombre() {
-    setNombreTema(tempNombre || 'Sin nombre')
-    setEditandoNombre(false)
+  // Load active template
+  useEffect(() => {
+    async function load() {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+      const { data } = await supabase
+        .from('configuracion_tienda')
+        .select('valor')
+        .eq('tenant_id', user.id)
+        .eq('clave', 'personalizar')
+        .maybeSingle()
+      if (data?.valor?.plantilla) setPlantillaActiva(data.valor.plantilla as string)
+    }
+    load()
+  }, [])
+
+  async function activarPlantilla(id: string) {
+    setSaving(true)
+    setSavedId(id)
+    const supabase = createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (user) {
+      await supabase.from('configuracion_tienda').upsert({
+        tenant_id: user.id,
+        clave: 'personalizar',
+        valor: { plantilla: id },
+        updated_at: new Date().toISOString(),
+      }, { onConflict: 'tenant_id,clave' })
+      setPlantillaActiva(id)
+    }
+    setSaving(false)
+    setTimeout(() => setSavedId(null), 2000)
   }
 
-  function usarPlantilla(p: Plantilla) {
-    setPlantillaActiva(p.id)
-    setNombreTema(p.nombre)
+  function handleComprar() {
+    if (!pago) return
+    activarPlantilla(pago.id)
+    setPago(null)
   }
 
-  const activaData = PLANTILLAS.find(p => p.id === plantillaActiva)!
-  const gratis = PLANTILLAS.filter((p) => p.precio === 'gratis')
-  const premium = PLANTILLAS.filter((p) => p.precio === 'premium')
+  const acciones = [
+    { icon: Palette, label: 'Personalizar tienda', sub: 'Editor visual', action: () => router.push('/tienda/personalizar') },
+    { icon: Eye, label: 'Ver mi tienda', sub: 'Abrir en nueva pestaña', action: () => window.open('/tienda-preview', '_blank') },
+    { icon: Settings, label: 'Temas', sub: 'Administrar plantillas', action: () => router.push('/tienda/temas') },
+    { icon: FileText, label: 'Páginas', sub: 'Nosotros, Contacto...', action: () => router.push('/tienda/paginas') },
+    { icon: Globe, label: 'Preferencias', sub: 'SEO, redes sociales', action: () => router.push('/tienda/preferencias') },
+    { icon: Link2, label: 'Dominio', sub: 'Conectar dominio propio', action: () => router.push('/tienda/dominios') },
+  ]
+
+  const activaInfo = PLANTILLAS.find(p => p.id === plantillaActiva)
 
   return (
     <div className="space-y-6">
+      {/* Header */}
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-semibold text-[#1a1a1a]">Tienda online</h1>
-        <a href="#" target="_blank" className="flex items-center gap-2 rounded-lg border border-[#e1e1e1] bg-white px-3 py-1.5 text-sm text-[#1a1a1a] hover:bg-[#f7f7f7] transition-colors">
-          <ExternalLink className="h-4 w-4" />
-          Ver tienda
-        </a>
+        <div>
+          <h1 className="text-xl font-semibold text-[#1a1a1a]">Tienda online</h1>
+          {activaInfo && (
+            <p className="text-sm text-[#6a6a6a] mt-0.5">Plantilla activa: <span className="font-medium" style={{ color: activaInfo.accentColor }}>{activaInfo.nombre}</span></p>
+          )}
+        </div>
+        <button
+          onClick={() => router.push('/tienda/personalizar')}
+          className="flex items-center gap-2 rounded-lg bg-[#1a1a1a] px-4 py-2 text-sm font-medium text-white hover:bg-[#2a2a2a] transition-colors"
+        >
+          <Palette className="h-4 w-4" />
+          Personalizar tienda
+        </button>
       </div>
 
-      {/* Tema actual */}
-      <div className="rounded-xl border border-[#e1e1e1] bg-white shadow-sm overflow-hidden">
-        <div className="border-b border-[#f1f1f1] px-6 py-3">
-          <span className="text-xs font-semibold uppercase tracking-wider text-[#8a8a8a]">Tema actual</span>
-        </div>
-        <div className="p-6 flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-4">
-            {/* Live thumbnail */}
-            <div className="h-20 w-32 rounded-lg overflow-hidden shrink-0 border border-[#f1f1f1]" style={{ backgroundColor: activaData.color }}>
-              <div className="h-5 w-full" style={{ backgroundColor: activaData.headerBg }} />
-              <div className="p-1.5 space-y-1">
-                <div className="h-1.5 rounded-full w-3/4" style={{ backgroundColor: activaData.accent + '80' }} />
-                <div className="h-1 rounded-full w-1/2 bg-[#1a1a1a]/10" />
-              </div>
+      {/* Quick actions */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+        {acciones.map(({ icon: Icon, label, sub, action }) => (
+          <button
+            key={label}
+            onClick={action}
+            className="flex flex-col items-center gap-2 rounded-xl border border-[#e1e1e1] bg-white p-4 text-center hover:border-[#c9c9c9] hover:shadow-sm transition-all"
+          >
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#f7f7f7]">
+              <Icon className="h-4 w-4 text-[#4a4a4a]" />
             </div>
             <div>
-              {editandoNombre ? (
-                <div className="flex items-center gap-2">
-                  <input
-                    className="rounded-lg border border-[#2a9d8f] px-3 py-1.5 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#2a9d8f]"
-                    value={tempNombre}
-                    onChange={(e) => setTempNombre(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && confirmarNombre()}
-                    autoFocus
-                  />
-                  <button onClick={confirmarNombre} className="text-[#2a9d8f]"><Check className="h-4 w-4" /></button>
-                  <button onClick={() => setEditandoNombre(false)} className="text-[#8a8a8a]"><X className="h-4 w-4" /></button>
-                </div>
-              ) : (
-                <button onClick={() => { setTempNombre(nombreTema); setEditandoNombre(true) }} className="text-base font-semibold text-[#1a1a1a] hover:text-[#2a9d8f] hover:underline underline-offset-2 transition-colors">
-                  {nombreTema}
-                </button>
-              )}
-              <p className="text-xs text-[#8a8a8a] mt-0.5">Publicado · Actualizado hoy</p>
-              <span className="mt-1.5 inline-block text-xs bg-[#dcfce7] text-[#166534] px-2 py-0.5 rounded-full font-medium">Activo</span>
+              <p className="text-xs font-semibold text-[#1a1a1a] leading-tight">{label}</p>
+              <p className="text-[10px] text-[#8a8a8a] mt-0.5">{sub}</p>
             </div>
-          </div>
-          <div className="flex flex-wrap gap-2 shrink-0">
-            <Link href="/tienda/personalizar" className="flex items-center gap-1.5 rounded-lg bg-[#1a1a1a] px-4 py-2 text-sm font-medium text-white hover:bg-[#2a2a2a] transition-colors">
-              <Palette className="h-4 w-4" />
-              Personalizar
-            </Link>
-            <button onClick={() => setModalPreview(activaData)} className="flex items-center gap-1.5 rounded-lg border border-[#e1e1e1] bg-white px-3 py-2 text-sm text-[#1a1a1a] hover:bg-[#f7f7f7] transition-colors">
-              <Eye className="h-4 w-4" />
-              Vista previa
-            </button>
-            <a href="/preview/optica-esencial" target="_blank" className="flex items-center gap-1.5 rounded-lg border border-[#e1e1e1] bg-white px-3 py-2 text-sm text-[#1a1a1a] hover:bg-[#f7f7f7] transition-colors">
-              <ExternalLink className="h-4 w-4" />
-              Ver tienda
-            </a>
-          </div>
-        </div>
-        <div className="border-t border-[#f1f1f1] px-6 py-3 flex flex-wrap gap-4">
-          <Link href="/tienda/dominios" className="flex items-center gap-1.5 text-sm text-[#2a9d8f] hover:text-[#238a7e] font-medium">
-            <Globe className="h-4 w-4" /> Conectar dominio existente
-          </Link>
-          <Link href="/tienda/temas" className="flex items-center gap-1.5 text-sm text-[#4a4a4a] hover:text-[#1a1a1a]">
-            <Layout className="h-4 w-4" /> Administrar temas
-          </Link>
-          <Link href="/tienda/paginas" className="flex items-center gap-1.5 text-sm text-[#4a4a4a] hover:text-[#1a1a1a]">
-            <FileText className="h-4 w-4" /> Ver páginas
-          </Link>
-          <Link href="/tienda/preferencias" className="flex items-center gap-1.5 text-sm text-[#4a4a4a] hover:text-[#1a1a1a]">
-            <Settings className="h-4 w-4" /> Editar preferencias
-          </Link>
-        </div>
+          </button>
+        ))}
       </div>
 
-      {/* Plantillas gratis */}
+      {/* Templates grid */}
       <div>
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-base font-semibold text-[#1a1a1a]">Plantillas gratuitas</h2>
-          <span className="text-xs text-[#8a8a8a]">3 plantillas</span>
-        </div>
+        <h2 className="text-sm font-semibold text-[#1a1a1a] mb-4">Plantillas disponibles</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {gratis.map((p) => (
-            <PlantillaCard
-              key={p.id}
-              plantilla={p}
-              activa={plantillaActiva === p.id}
-              onUsar={() => usarPlantilla(p)}
-              onComprar={() => {}}
-              onPreview={() => setModalPreview(p)}
-            />
-          ))}
+          {PLANTILLAS.map((p) => {
+            const isActive = plantillaActiva === p.id
+            const isSaving = saving && savedId === p.id
+
+            return (
+              <div
+                key={p.id}
+                className={`rounded-2xl border-2 bg-white overflow-hidden transition-all ${isActive ? 'border-[#2a9d8f] shadow-md' : 'border-[#e1e1e1] hover:border-[#c9c9c9] hover:shadow-sm'}`}
+              >
+                {/* Preview thumbnail */}
+                <div className="relative h-44 overflow-hidden" style={{ background: p.gradient }}>
+                  {/* Mock browser chrome */}
+                  <div className="absolute top-0 left-0 right-0 h-6 bg-black/10 backdrop-blur-sm flex items-center px-3 gap-1.5">
+                    <div className="h-2 w-2 rounded-full bg-white/40" />
+                    <div className="h-2 w-2 rounded-full bg-white/40" />
+                    <div className="h-2 w-2 rounded-full bg-white/40" />
+                  </div>
+                  {/* Mock navbar */}
+                  <div className="absolute top-6 left-0 right-0 h-8 flex items-center px-4 justify-between" style={{ backgroundColor: p.accentColor + 'cc' }}>
+                    <div className="h-3 w-12 rounded bg-white/30" />
+                    <div className="flex gap-1.5">
+                      <div className="h-2 w-8 rounded bg-white/20" />
+                      <div className="h-2 w-8 rounded bg-white/20" />
+                      <div className="h-2 w-8 rounded bg-white/20" />
+                    </div>
+                    <div className="h-4 w-14 rounded bg-white/30" />
+                  </div>
+                  {/* Mock hero */}
+                  <div className="absolute top-14 left-0 right-0 bottom-0 flex flex-col items-center justify-center gap-2 px-4">
+                    <div className="h-4 w-32 rounded-full" style={{ backgroundColor: p.accentColor + '60' }} />
+                    <div className="h-2.5 w-24 rounded-full" style={{ backgroundColor: p.accentColor + '40' }} />
+                    <div className="h-6 w-20 rounded-lg mt-1" style={{ backgroundColor: p.accentColor + '80' }} />
+                  </div>
+                  {/* Active badge */}
+                  {isActive && (
+                    <div className="absolute top-8 right-2 flex items-center gap-1 bg-[#2a9d8f] text-white text-[9px] font-bold px-2 py-0.5 rounded-full">
+                      <Check className="h-2.5 w-2.5" /> Activa
+                    </div>
+                  )}
+                  {p.precio === 'premium' && !isActive && (
+                    <div className="absolute top-8 right-2 flex items-center gap-1 bg-[#1a1a1a] text-white text-[9px] font-bold px-2 py-0.5 rounded-full">
+                      <Lock className="h-2.5 w-2.5" /> S/65
+                    </div>
+                  )}
+                </div>
+
+                {/* Info */}
+                <div className="p-4">
+                  <div className="flex items-start justify-between gap-2 mb-1">
+                    <h3 className="text-sm font-semibold text-[#1a1a1a]">{p.nombre}</h3>
+                    <span className={`shrink-0 text-[10px] font-semibold px-2 py-0.5 rounded-full ${p.precio === 'gratis' ? 'bg-[#dcfce7] text-[#166534]' : 'bg-[#fef9c3] text-[#854d0e]'}`}>
+                      {p.precio === 'gratis' ? 'Gratis' : 'S/ 65'}
+                    </span>
+                  </div>
+                  <p className="text-xs text-[#6a6a6a] mb-4 line-clamp-2">{p.descripcion}</p>
+
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setPreview(p)}
+                      className="flex items-center gap-1.5 rounded-lg border border-[#e1e1e1] px-3 py-1.5 text-xs text-[#4a4a4a] hover:bg-[#f7f7f7] transition-colors"
+                    >
+                      <Eye className="h-3 w-3" /> Previsualizar
+                    </button>
+                    {isActive ? (
+                      <button
+                        onClick={() => router.push('/tienda/personalizar')}
+                        className="flex-1 flex items-center justify-center gap-1.5 rounded-lg bg-[#2a9d8f] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#239085] transition-colors"
+                      >
+                        <Palette className="h-3 w-3" /> Personalizar
+                      </button>
+                    ) : p.precio === 'gratis' ? (
+                      <button
+                        onClick={() => activarPlantilla(p.id)}
+                        disabled={isSaving}
+                        className="flex-1 flex items-center justify-center gap-1.5 rounded-lg bg-[#1a1a1a] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#2a2a2a] disabled:opacity-60 transition-colors"
+                      >
+                        {isSaving ? '✓ Activado' : <><Check className="h-3 w-3" /> Activar</>}
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => setPago(p)}
+                        className="flex-1 flex items-center justify-center gap-1.5 rounded-lg bg-[#854d0e] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#713f12] transition-colors"
+                      >
+                        <Lock className="h-3 w-3" /> Comprar S/65
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )
+          })}
         </div>
       </div>
 
-      {/* Plantillas premium */}
-      <div>
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-base font-semibold text-[#1a1a1a]">Plantillas premium</h2>
-          <span className="text-xs bg-[#fef9c3] text-[#854d0e] px-2 py-0.5 rounded-full font-medium">$19 USD / S/65</span>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {premium.map((p) => (
-            <PlantillaCard
-              key={p.id}
-              plantilla={p}
-              activa={plantillaActiva === p.id}
-              onUsar={() => usarPlantilla(p)}
-              onComprar={() => setModalPago(p)}
-              onPreview={() => setModalPreview(p)}
-            />
-          ))}
-        </div>
-      </div>
-
-      {modalPago && (
-        <ModalPago
-          plantilla={modalPago}
-          onClose={() => setModalPago(null)}
-          onSuccess={() => { usarPlantilla(modalPago); setModalPago(null) }}
-        />
-      )}
-      {modalPreview && (
-        <ModalPreview plantilla={modalPreview} onClose={() => setModalPreview(null)} />
-      )}
+      {/* Modals */}
+      {preview && <ModalPreview plantilla={preview} onClose={() => setPreview(null)} />}
+      {pago && <ModalPago plantilla={pago} onClose={() => setPago(null)} onBuy={handleComprar} />}
     </div>
   )
 }

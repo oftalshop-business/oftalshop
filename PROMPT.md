@@ -1,113 +1,176 @@
 Eres el desarrollador de OftalShop, clon de Shopify para ópticas.
 Stack: Next.js 14, TypeScript, Tailwind CSS, Supabase.
 
-TAREA: Editor visual de tienda completo + arquitectura multitenant.
+PROBLEMA ACTUAL: Las plantillas muestran siempre la misma vista,
+el editor no es funcional, y la página de producto no tiene flujo
+de lentes con prescripción.
 
-=== ARCHIVO 1: /src/app/(admin)/tienda/personalizar/page.tsx ===
-Editor visual IDENTICO a Shopify - completamente funcional:
+REESCRIBE COMPLETAMENTE estos archivos:
 
-ESTRUCTURA:
-- Layout de 2 paneles: izquierdo 320px + derecho resto
-- Topbar: botón volver, nombre tema editable, botones Desktop/Tablet/Mobile, botón Guardar (verde), botón Publicar
+=== ARCHIVO 1: /src/app/(admin)/tienda/page.tsx ===
+Página principal tienda online. Botones que NAVEGUEN correctamente:
+- "Personalizar" → router.push('/admin/tienda/personalizar')
+- "Ver tienda" → window.open('/tienda-preview', '_blank')  
+- "Administrar temas" → router.push('/admin/tienda/temas')
+- "Ver páginas" → router.push('/admin/tienda/paginas')
+- "Editar preferencias" → router.push('/admin/tienda/preferencias')
+- "Conectar dominio" → router.push('/admin/tienda/dominios')
 
-PANEL IZQUIERDO (fondo blanco, scroll independiente):
-- Selector de página: Inicio / Producto / Colección / Carrito
-- Lista de secciones con drag and drop (usar array con índices):
-  Cada sección tiene: icono drag, nombre, botón editar (lápiz), botón eliminar (X)
+Grid de 6 plantillas. Cada plantilla tiene:
+- Imagen preview DIFERENTE (usar gradientes CSS únicos por plantilla)
+- Nombre y descripción
+- Badge "Gratis" o "S/65"
+- Botón "Activar" (gratis) o "Comprar" (premium)
+- Botón "Previsualizar" → abre modal con preview del componente
+
+Estado local: plantillaActiva (string) guardado en Supabase
+Al activar plantilla gratis: actualiza configuracion_tienda.plantilla
+
+=== ARCHIVO 2: /src/app/(admin)/tienda/personalizar/page.tsx ===
+REESCRIBIR COMPLETAMENTE. Editor visual 100% funcional:
+
+Estado inicial cargado desde Supabase configuracion_tienda del tenant:
+```typescript
+const [config, setConfig] = useState({
+  plantilla: 'esencial',
+  colores: { primario: '#000', secundario: '#fff', acento: '#00a651', fondo: '#fff', texto: '#000' },
+  tipografia: { titulo: 'Inter', cuerpo: 'Inter' },
+  logoUrl: '',
+  secciones: [
+    { id: '1', tipo: 'header', activa: true, config: { mostrarBusqueda: true, mostrarCarrito: true } },
+    { id: '2', tipo: 'banner', activa: true, config: { titulo: 'Bienvenido', subtitulo: '', imagenUrl: '', altura: 'M', alineacion: 'centro', textoBoton: 'Ver productos', opacidad: 20 } },
+    { id: '3', tipo: 'productos', activa: true, config: { titulo: 'Productos destacados', cantidad: 8 } },
+    { id: '4', tipo: 'footer', activa: true, config: { texto: 'Tu óptica de confianza' } }
+  ]
+})
+```
+
+PANEL IZQUIERDO (w-80, bg-white, border-r, overflow-y-auto):
+- Header: "← Volver" + nombre plantilla + botón "Guardar" verde
+- Selector páginas: tabs Inicio | Producto | Colección | Carrito
+- Lista secciones: cada una con nombre, botón editar(lápiz), toggle on/off
+- Al click en lápiz: expande AccordionItem con opciones de esa sección
+- Cada tipo de sección tiene sus propias opciones:
+  * banner: input título, input subtítulo, input texto botón, select altura(S/M/L/XL), select alineación, range opacidad
+  * productos: input título sección, select cantidad(4/8/12), toggle mostrar precio, toggle mostrar botón
+  * header: toggle mostrar búsqueda, toggle mostrar carrito, toggle fondo transparente
+  * footer: textarea texto empresa, inputs redes sociales
+- Botón "+ Agregar sección" → muestra lista de tipos disponibles para añadir
+- Tab "Configuración":
+  * 5 inputs type="color" para colores (primario, secundario, acento, fondo, texto)
+  * Select fuente título: Inter|Playfair Display|Montserrat|Raleway|Oswald
+  * Select fuente cuerpo: Inter|Lato|Open Sans|Merriweather
+  * Input subir logo
+
+PANEL DERECHO (flex-1, bg-gray-100):
+- Topbar preview: botones Desktop(💻)/Tablet(📱)/Mobile(📱) que cambian el ancho
+- Contenedor con ancho dinámico: desktop=100%, tablet=768px, mobile=375px
+- Renderiza <StorePreview config={config} /> en tiempo real
+- Cada cambio en panel izquierdo actualiza config → preview se actualiza
+
+Al guardar: upsert a Supabase tabla configuracion_tienda donde tenant_id = getCurrentTenantId()
+
+=== ARCHIVO 3: /src/components/store/StorePreview.tsx ===
+Componente que renderiza la tienda según config:
+- Recibe props: config completo
+- Mapea config.secciones y renderiza cada una
+- Aplica config.colores via style={{ '--color-primario': config.colores.primario }}
+- Aplica config.tipografia cargando Google Font dinámicamente
+- Renderiza secciones activas en orden
+- Cada sección es un sub-componente: HeaderSection, BannerSection, ProductosSection, FooterSection
+- ProductosSection muestra productos reales del tenant (fetch a Supabase)
+
+=== ARCHIVO 4: /src/components/templates/TemplatePreview.tsx ===
+Modal de preview de plantilla:
+- Recibe: plantillaNombre (string)
+- Renderiza el componente correspondiente según nombre:
+  * 'esencial' → OpticaEsencial con datos mock
+  * 'clinica' → ClinicaConfianza con datos mock
+  * 'lensshop' → LensShop con datos mock
+  * 'visionpro' → VisionPro con datos mock
+  * 'luxoptic' → LuxOptic con datos mock
+  * 'medcenter' → MedCenterPro con datos mock
+- Muestra en modal fullscreen con botón cerrar
+
+=== ARCHIVO 5: /src/app/[tenant]/productos/[slug]/page.tsx ===
+Página de producto con FLUJO COMPLETO de prescripción:
+
+SECCIÓN PRINCIPAL:
+- Galería imágenes izquierda (thumbnails + imagen grande)
+- Info derecha: nombre, precio, descripción corta
+
+FLUJO PRESCRIPCIÓN (si producto.requiere_prescripcion = true):
+Botón grande "Seleccionar lentes" que abre wizard de pasos:
+
+PASO 1 - Tipo de uso:
+  Cards seleccionables:
+  * "Solo armazón" (sin lentes)
+  * "Lentes sin medida" (lentes planos)  
+  * "Lentes con medida" (con prescripción)
+  * "Lentes de sol" (polarizados)
+
+PASO 2 - Tipo de visión (si eligió con medida):
+  Cards: Visión Simple | Bifocal | Progresivo | Solo lectura
+
+PASO 3 - Material del lente:
+  Cards con cada material del tenant (desde tabla materiales_luna):
+  Ejemplo: CR-39 | Policarbonato | Trivex | Alto índice 1.67
+  Cada card muestra: nombre, descripción, precio adicional
+
+PASO 4 - Tratamiento:
+  Cards con tratamientos del tenant (desde tabla tratamientos):
+  Ejemplo: Sin tratamiento | Antirreflejo | Fotocromático | Blue Cut
+  Con precio adicional por tratamiento
+
+PASO 5 - Prescripción:
+  Toggle: "Ingresar manualmente" / "Subir foto de receta"
   
-  Secciones disponibles para agregar:
-  * Anuncio superior (barra de texto)
-  * Header/Navegación (logo, menú, carrito)
-  * Banner hero (imagen, título, subtítulo, botón CTA)
-  * Colecciones destacadas
-  * Productos destacados (conectado a tabla productos del tenant)
-  * Texto con imagen (izquierda/derecha)
-  * Video (URL YouTube/Vimeo)
-  * Testimonios
-  * Galería de imágenes
-  * Newsletter/Suscripción
-  * Mapa/Ubicación
-  * Footer
+  Si manual - tabla de ingreso:
+  | | Esférico | Cilindro | Eje | ADD | DIP |
+  |OD| input | input | input | input | input |
+  |OI| input | input | input | input | input |
+  
+  Si foto - dropzone para subir imagen (Supabase Storage)
 
-  Botón "+ Agregar sección" que abre panel lateral con lista de secciones disponibles
+PASO 6 - Resumen:
+  - Armazón seleccionado + precio
+  - Material seleccionado + precio adicional
+  - Tratamiento seleccionado + precio adicional
+  - TOTAL calculado
+  - Botón "Agregar al carrito"
 
-- Al hacer click en sección se expande panel de edición con sus opciones:
-  * Banner hero: subir imagen (Supabase Storage), título, subtítulo, texto botón, link botón, altura (S/M/L/XL), alineación contenido, opacidad overlay, color overlay
-  * Productos destacados: seleccionar colección (dropdown con colecciones del tenant), número de productos (4/8/12), mostrar precio (toggle), mostrar botón agregar (toggle)
-  * Texto con imagen: textarea texto, subir imagen, posición imagen (izquierda/derecha), botón CTA
-  * Testimonios: agregar/editar/eliminar testimonios con nombre, cargo, texto, rating
-  * Header: subir logo, links de navegación editables, mostrar búsqueda (toggle), mostrar carrito (toggle)
-  * Footer: texto empresa, links columna 1/2/3, redes sociales
+Barra de progreso en la parte superior mostrando en qué paso está.
+Botones Anterior/Siguiente entre pasos.
+Todo el estado manejado con useState.
 
-TAB CONFIGURACIÓN DEL TEMA:
-  * Colores: primario, secundario, acento, fondo, texto, encabezados (color pickers HTML)
-  * Tipografía: selector fuente títulos, selector fuente cuerpo (Google Fonts: Inter, Playfair Display, Montserrat, Raleway, Lato, Oswald, Merriweather)
-  * Espaciado: compacto/normal/amplio
-  * Bordes: sin bordes/redondeados/muy redondeados
-  * Logo: subir imagen
-  * Favicon: subir imagen
+SECCIÓN INFERIOR:
+- Descripción completa del producto (rich text)
+- Tabla de medidas si existe (desde medidas_producto)
+- Productos relacionados
 
-PANEL DERECHO (preview en vivo):
-- Muestra iframe o componente React que renderiza la tienda
-- Cambia tamaño según Desktop(100%)/Tablet(768px)/Mobile(375px)
-- Se actualiza en tiempo real con cada cambio del panel izquierdo
-- Muestra datos reales del tenant: sus productos, su logo, sus colores
+=== ARCHIVO 6: /src/app/[tenant]/carrito/page.tsx ===
+Página carrito completa:
+- Lista de items con imagen, nombre, configuración de lentes seleccionada, precio, cantidad, eliminar
+- Resumen: subtotal, envío, total
+- Botón "Proceder al pago"
+- Estado del carrito en localStorage + Supabase (tabla carrito con tenant_id)
 
-Al guardar: guarda en Supabase tabla configuracion_tienda con tenant_id
+=== ARCHIVO 7: /src/app/[tenant]/checkout/page.tsx ===
+Checkout en 3 pasos:
+PASO 1 - Datos de contacto: nombre, email, teléfono
+PASO 2 - Dirección de envío: dirección, ciudad, distrito, referencias
+PASO 3 - Pago: 
+  Cards de métodos: Tarjeta (Stripe), Yape/Plin (QR), Transferencia, Contra entrega
+  Resumen del pedido
+  Botón confirmar pedido → crea registro en tabla pedidos
 
-=== ARCHIVO 2: /src/components/store/StorePreview.tsx ===
-Componente de preview de la tienda:
-- Recibe como props: secciones[], colores{}, tipografia{}, productos[], tenant
-- Renderiza cada sección según su tipo y configuración
-- Usa los colores y fuentes configurados via CSS variables
-- Muestra productos reales del tenant desde Supabase
-- Responsive según el tamaño seleccionado
-
-=== ARCHIVO 3: /src/lib/tenant.ts ===
-Utilidades multitenant:
-- getCurrentTenant(): obtiene tenant_id del usuario autenticado desde Supabase Auth
-- getTenantConfig(): obtiene configuracion_tienda del tenant actual
-- Todas las queries de Supabase deben filtrar por tenant_id
-- Hook useTenant() para usar en componentes React
-
-=== ARCHIVO 4: /src/middleware.ts ===
-Middleware actualizado con multitenant:
-- Lee el usuario autenticado
-- Adjunta tenant_id a los headers de cada request
-- Protege rutas /admin/* requiriendo autenticación
-- Rutas públicas: /, /login, /registro, /recuperar
-
-=== ARCHIVO 5: SQL Migration ===
-SQL para ejecutar en Supabase:
-- Agregar columna tenant_id a historias_clinicas si no existe
-- Políticas RLS para todas las tablas filtrando por tenant_id
-- Función get_tenant_id() que retorna el tenant del usuario autenticado
-
-CREATE POLICY "tenant isolation" ON productos
-FOR ALL USING (
-  tenant_id = (
-    SELECT tenant_id FROM usuarios 
-    WHERE auth_user_id = auth.uid()
-  )
-);
-Aplicar misma política a: variantes, medias, pedidos, clientes_tienda,
-materiales_luna, tratamientos, medidas_producto, colecciones,
-descuentos, configuracion_tienda, historias_clinicas
-
-=== ARCHIVO 6: /src/app/[tenant]/page.tsx ===
-Tienda pública multitenant actualizada:
-- Lee el slug del tenant desde la URL
-- Obtiene configuracion_tienda del tenant por slug
-- Renderiza secciones guardadas en el editor
-- Datos reales: productos, colecciones del tenant
-- Si tenant no existe: página 404 personalizada
-- Si tienda inactiva: página de mantenimiento con contraseña
-
-Requisitos:
-- Estado React para todas las ediciones del panel
-- Preview en tiempo real sin guardar hasta click en Guardar
+Requisitos CRÍTICOS:
+- Todo el estado del editor debe ser React useState
+- Preview debe actualizarse SIN recargar página
+- Plantillas deben ser componentes distintos que se renderizan según selección
+- Flujo de prescripción completo paso a paso
 - TypeScript sin errores
+- Datos reales desde Supabase filtrados por tenant_id
 - Iconos lucide-react
-- Todo filtrado por tenant_id
 
-Genera todos los archivos completos.
+Genera TODOS los archivos completos y funcionales.

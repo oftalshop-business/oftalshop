@@ -14,11 +14,14 @@ const PROTECTED = [
   '/configuracion',
 ]
 
+const AUTH_PAGES = ['/login', '/registro', '/recuperar']
+
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
   const isProtected = PROTECTED.some((p) => pathname === p || pathname.startsWith(p + '/'))
+  const isAuthPage = AUTH_PAGES.includes(pathname)
 
-  if (!isProtected) return NextResponse.next()
+  if (!isProtected && !isAuthPage) return NextResponse.next()
 
   let response = NextResponse.next({ request })
 
@@ -43,7 +46,14 @@ export async function middleware(request: NextRequest) {
 
   const { data: { user } } = await supabase.auth.getUser()
 
-  if (!user) {
+  if (isAuthPage && user) {
+    const dashboardUrl = request.nextUrl.clone()
+    dashboardUrl.pathname = '/dashboard'
+    dashboardUrl.search = ''
+    return NextResponse.redirect(dashboardUrl)
+  }
+
+  if (isProtected && !user) {
     const loginUrl = request.nextUrl.clone()
     loginUrl.pathname = '/login'
     loginUrl.searchParams.set('next', pathname)

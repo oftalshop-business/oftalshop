@@ -1,131 +1,115 @@
 Eres el desarrollador de OftalShop, clon de Shopify para ópticas.
-Stack: Next.js 14, TypeScript, Tailwind CSS, Supabase.
+Stack: Next.js 14, TypeScript, Tailwind CSS, Supabase Auth.
 
-TAREA: Rediseñar completamente las plantillas y arreglar pestañas de tienda online.
+Crea el sistema completo de autenticacion y landing page:
 
-=== ARCHIVO 1: /src/app/(admin)/tienda/page.tsx ===
-Arreglar navegación - estas rutas deben funcionar:
-- "Personalizar" → navega a /admin/tienda/personalizar
-- "Administrar temas" → navega a /admin/tienda/temas
-- "Ver páginas" → navega a /admin/tienda/paginas
-- "Editar preferencias" → navega a /admin/tienda/preferencias
-- "Ver tienda" → abre nueva pestaña con /preview/optica-esencial
-- "Vista previa" → abre modal con iframe preview
-- "Conectar dominio" → navega a /admin/tienda/dominios
+=== ARCHIVO 1: /src/app/page.tsx ===
+Landing page profesional de OftalShop SaaS:
 
-Grid de 6 plantillas con diseños COMPLETAMENTE distintos entre sí.
+HERO SECTION:
+- Fondo gradiente azul oscuro a negro
+- Logo OftalShop arriba izquierda
+- Navegacion: Caracteristicas, Precios, Testimonios, Iniciar sesion, Empezar gratis
+- Titulo grande: "El Shopify para ópticas y clínicas oftalmológicas"
+- Subtitulo: "Crea tu tienda online, gestiona pedidos, inventario y clientes. Todo en un solo lugar."
+- Dos botones CTA: "Empezar gratis 14 días" (verde) y "Ver demo" (outline blanco)
+- Imagen/mockup del dashboard a la derecha
 
-=== ARCHIVO 2: /src/app/(admin)/tienda/temas/page.tsx ===
-Página administrar temas:
-- Lista de temas instalados con opción activar/eliminar
-- Biblioteca de temas disponibles
-- Las 6 plantillas con preview visual
+SECCION CARACTERISTICAS:
+- Titulo: "Todo lo que necesita tu óptica"
+- 6 cards con icono, titulo y descripcion:
+  * Tienda online profesional
+  * Gestión de productos ópticos (materiales, tratamientos, medidas)
+  * Pedidos y clientes
+  * Múltiples pasarelas de pago
+  * Editor visual de tienda
+  * Informes y estadísticas
 
-=== ARCHIVO 3: /src/app/(admin)/tienda/paginas/page.tsx ===
-Ver páginas:
-- Tabla de páginas creadas: Inicio, Nosotros, Contacto, etc.
-- Botón agregar página
-- Por fila: editar, eliminar, ver preview
+SECCION PARA QUIEN ES:
+- Titulo: "Diseñado para negocios ópticos"
+- 5 cards: Ópticas, Clínicas oftalmológicas, Laboratorios ópticos, E-commerce de lentes, Distribuidoras
+- Cada card con icono y descripcion corta
 
-=== ARCHIVO 4: /src/components/templates/OpticaEsencial.tsx ===
-Plantilla GRATIS - Ecommerce tradicional minimalista:
-- Fondo blanco, tipografía negra, acentos en verde #00a651
-- Header: logo izquierda, navegación centro, carrito y búsqueda derecha
-- Hero banner: imagen full width con texto overlay y botón CTA
-- Barra de categorías: Monturas, Lentes de sol, Lentes de contacto, Accesorios
-- Grid productos: 4 columnas, imagen cuadrada, nombre, precio, botón agregar
-- Sección ofertas: banner con countdown timer
-- Sección marcas: logos en fila
-- Newsletter: fondo gris claro, input email
-- Footer: 4 columnas links + redes sociales
-- UX tradicional, limpio, funcional
+SECCION PRECIOS:
+- Titulo: "Planes simples y transparentes"
+- 3 cards de planes:
+  * Básico $19/mes: 50 productos, 1 pasarela pago, 3 plantillas gratis, soporte email
+  * Intermedio $49/mes (badge POPULAR): 300 productos, 3 pasarelas, dominio propio, editor visual
+  * Pro $99/mes: ilimitado todo, multi-usuario, white label, soporte WhatsApp
+- Cada plan con botón "Empezar ahora"
+- Toggle mensual/anual con 20% descuento anual
 
-=== ARCHIVO 5: /src/components/templates/ClinicaConfianza.tsx ===
-Plantilla GRATIS - Clínica oftalmológica profesional:
-- Colores: azul médico #1e40af, blanco, gris claro
-- Tipografía: serif para títulos (confianza/autoridad)
-- Header: logo + navegación: Inicio, Servicios, Doctores, Blog, Tienda, Contacto
-- Hero: imagen de clínica moderna con texto "Tu visión es nuestra misión" + botón Agendar cita
-- Sección servicios: 6 cards con icono médico: Examen visual, Cirugía LASIK, Lentes de contacto, Tratamientos, Optometría, Urgencias
-- Sección doctores: 3 cards con foto circular, nombre, especialidad, años experiencia
-- Sección productos tienda: grid de productos ópticos con precio
-- Sección blog: 3 artículos recientes con imagen y extracto
-- Sección testimonios: estrellas, foto paciente, comentario
-- Sección ubicación: mapa placeholder + datos contacto
-- Footer médico con certificaciones
+SECCION TESTIMONIOS:
+- 3 testimonios con foto avatar, nombre, tipo de negocio, estrellas y comentario
+- Ejemplos: óptica Lima, clínica oftalmológica, laboratorio óptico
 
-=== ARCHIVO 6: /src/components/templates/LensShop.tsx ===
-Plantilla GRATIS - Ecommerce premium de lentes:
-- Colores: negro #0a0a0a, dorado #c9a84c, blanco
-- Tipografía: moderna y elegante
-- Header sticky con transparencia que cambia al hacer scroll
-- Hero: pantalla completa con video/imagen de fondo, texto centrado grande, dos botones CTA
-- Sección "Nuevo esta temporada": scroll horizontal de productos
-- Filtros avanzados visibles: marca, precio, tipo, material
-- Grid productos: 3 columnas, imagen grande con hover zoom, quick add al carrito
-- Sección lookbook: grid estilo editorial con imágenes grandes
-- Sección bestsellers con badge de ventas
-- Programa de puntos/fidelización
-- Chat widget flotante
-- Footer oscuro con newsletter destacado
+SECCION CTA FINAL:
+- Fondo azul
+- "¿Listo para digitalizar tu negocio óptico?"
+- Botón grande "Empezar gratis 14 días"
 
-=== ARCHIVO 7: /src/components/templates/VisionPro.tsx ===
-Plantilla PREMIUM $19 - Inspirada en mejores ópticas del mundo:
-- Diseño SOFISTICADO y PREMIUM
-- Colores: blanco puro, negro intenso, acento azul eléctrico #0066ff
-- Tipografía: display font grande y bold para impacto
-- Header minimalista: solo logo centrado + menú hamburguesa
-- Hero IMPACTANTE: imagen producto gigante, texto minimalista, animación entrada
-- Sección "Colecciones": 3 cards grandes con hover parallax effect
-- Grid productos premium: imagen cuadrada grande, nombre elegante, precio discreto
-- Sección "Nuestra historia": texto + imagen lado a lado, estilo magazine
-- Sección "Como funciona": 3 pasos con iconos lineales
-- Testimonios: citas grandes en cursiva, sin estrellas (más premium)
-- Footer minimalista con newsletter
-- Micro-animaciones en hover de todos los elementos
+FOOTER:
+- Logo + descripcion corta
+- Links: Producto, Empresa, Soporte, Legal
+- Redes sociales
+- Copyright OftalShop 2025
 
-=== ARCHIVO 8: /src/components/templates/LuxOptic.tsx ===
-Plantilla PREMIUM $19 - Estilo Ray-Ban/Oakley lujo:
-- Colores: negro absoluto #000, rojo #e63946, blanco
-- Tipografía: bold, industrial, impactante
-- Header: fondo negro, logo blanco, menú blanco
-- Hero: video background (placeholder), texto blanco gigante "SEE THE WORLD DIFFERENTLY"
-- Sección categorías: imágenes full bleed con texto overlay blanco
-- Productos: fondo negro, imágenes con fondo transparente, precio en blanco
-- Sección "Tecnología": specs técnicas de los lentes con iconos
-- Sección atletas/embajadores: fotos grandes en blanco y negro
-- Carrito lateral slide-in
-- Efectos: parallax, fade-in scroll, hover scale
-- Totalmente oscura, agresiva, premium
+Diseño: profesional, moderno, colores azul #1e40af y blanco,
+tipografia limpia, animaciones suaves, totalmente responsive.
 
-=== ARCHIVO 9: /src/components/templates/MedCenterPro.tsx ===
-Plantilla PREMIUM $19 - Clínicas grandes corporativo:
-- Colores: azul corporativo #003366, blanco, gris #f8f9fa
-- Diseño: corporativo, institucional, máxima confianza
-- Header: barra superior con teléfono y horarios + header principal con logo y navegación completa
-- Mega menú: Especialidades, Doctores, Tecnología, Pacientes, Investigación, Tienda
-- Hero: slider de 3 slides con diferentes servicios
-- Sección estadísticas: 20,000+ pacientes, 15+ años, 98% satisfacción, 50+ doctores
-- Sección especialidades: grid 6 especialidades con icono médico premium
-- Sección tecnología: equipos de última generación con imagen y descripción
-- Sección equipo médico: grid doctores con foto, nombre, especialidad, universidad
-- Sección acreditaciones: logos certificaciones médicas
-- Sección noticias/blog corporativo
-- Footer institucional completo con mapa, horarios, emergencias 24h
+=== ARCHIVO 2: /src/app/login/page.tsx ===
+Pagina de login:
+- Fondo gris claro
+- Card centrada blanca con sombra
+- Logo OftalShop arriba
+- Titulo: "Iniciar sesión"
+- Input: Email
+- Input: Contraseña (con toggle mostrar/ocultar)
+- Botón: "Iniciar sesión" (azul, full width)
+- Link: "¿Olvidaste tu contraseña?"
+- Separador "o"
+- Link: "¿No tienes cuenta? Empezar gratis"
+- Conectado a Supabase Auth con signInWithPassword
+- Si login exitoso: redirect a /dashboard
+- Mostrar errores si credenciales incorrectas
 
-=== ARCHIVO 10: /src/app/(admin)/tienda/personalizar/page.tsx ===
-Editor visual actualizado:
-- Panel izquierdo muestra preview de la plantilla activa
-- Selector de plantilla en la parte superior
-- Al seleccionar plantilla diferente, el preview cambia
-- Las 3 plantillas premium muestran badge "Premium" con candado
-- Al intentar usar premium sin pagar: modal de compra S/65
+=== ARCHIVO 3: /src/app/registro/page.tsx ===
+Pagina de registro:
+- Card centrada igual que login
+- Campos: Nombre completo, Email, Contraseña, Confirmar contraseña
+- Selector de plan: Básico / Intermedio / Pro
+- Nombre de la tienda (genera el slug automático)
+- Checkbox: acepto términos y condiciones
+- Botón: "Crear cuenta gratis"
+- Conectado a Supabase Auth con signUp
+- Al registrar: crear registro en tabla tenants con los datos
+- Redirect a /dashboard tras registro exitoso
+
+=== ARCHIVO 4: /src/app/recuperar/page.tsx ===
+Recuperar contraseña:
+- Card centrada
+- Input email
+- Botón enviar enlace
+- Conectado a Supabase Auth resetPasswordForEmail
+- Mensaje de confirmación tras enviar
+
+=== ARCHIVO 5: /src/middleware.ts ===
+Middleware de autenticacion completo:
+- Rutas protegidas: todo /dashboard y /(admin)/* requiere sesion activa
+- Si no hay sesion: redirect a /login
+- Si hay sesion y visita /login: redirect a /dashboard
+- Rutas publicas: /, /login, /registro, /recuperar, /[tenant]/*
+
+=== ARCHIVO 6: /src/lib/supabase/client.ts ===
+=== ARCHIVO 7: /src/lib/supabase/server.ts ===
+Clientes Supabase actualizados y correctos para Next.js 16.
 
 Requisitos:
-- Cada plantilla debe verse COMPLETAMENTE diferente
-- Las premium deben verse notablemente más sofisticadas
-- Todas deben ser componentes React con props editables
 - TypeScript sin errores
+- Supabase Auth completamente funcional
+- Manejo de errores en todos los formularios
+- Loading states en botones
+- Responsive en mobile
 - Iconos lucide-react
 
 Genera todos los archivos completos.

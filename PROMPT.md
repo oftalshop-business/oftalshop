@@ -1,49 +1,48 @@
 Eres el desarrollador de OftalShop, clon de Shopify para ópticas.
 Stack: Next.js 14, TypeScript, Tailwind CSS, Supabase.
 
-Crea estos 4 modulos completos:
+Crea estos 2 modulos completos:
 
-=== MODULO CLIENTES ===
-Archivo: /src/app/(admin)/clientes/page.tsx
-- Tabla: checkbox, Nombre, Email, Pedidos, Total gastado, Ubicación, Fecha registro
-- Botón "Agregar cliente" abre modal con campos: nombre, email, teléfono, dirección
-- Por fila: Editar y Eliminar con confirmación
-- Búsqueda de clientes
-- 5 clientes de ejemplo
-- Conectado a Supabase tabla clientes_tienda
+=== MODULO INFORMES ===
+Archivo: /src/app/(admin)/informes/page.tsx
+- Tabs superiores: Ventas, Clientes, Inventario, Marketing
+- TAB VENTAS:
+  * Gráfico de líneas: ventas por fecha (usar recharts)
+  * Filtros: Por producto, Por cliente, Por canal, Por fecha
+  * Cards métricas: Total ventas, Promedio por pedido, Pedidos totales
+  * Tabla resumen con datos de ejemplo
+- TAB CLIENTES:
+  * Gráfico barras: Clientes nuevos vs Recurrentes
+  * Card: Valor de vida del cliente (LTV)
+  * Mapa/tabla: Ubicación de clientes por ciudad
+- TAB INVENTARIO:
+  * Resumen de inventario: total productos, stock bajo, sin stock
+  * Gráfico: Inventario por producto
+  * Tabla: Rotación de inventario con columnas producto, vendidos, stock actual
+- TAB MARKETING:
+  * Filtros: Uso de descuentos, Rendimiento campañas, Conversión por canal
+  * Gráficos correspondientes a cada filtro
+  * Tabla de rendimiento
 
-=== MODULO CONTENIDO ===
-Archivo: /src/app/(admin)/contenido/page.tsx
-- Secciones: Páginas, Blog, Archivos, Menú de navegación
-- Botones: Agregar página, Crear artículo, Subir archivo, Editar menú
-- Tabla de páginas con: Título, Visibilidad, Fecha, acciones Editar/Eliminar
-- Modal crear página: título, contenido rich text, visibilidad
-- Modal crear artículo: título, contenido, imagen destacada
+=== MODULO CONFIGURACION ===
+Archivo: /src/app/(admin)/configuracion/page.tsx
+- Layout: lista de secciones al lado izquierdo + contenido derecho
+- Secciones funcionales con formularios editables:
+  * Información de la tienda: nombre, email, teléfono, dirección, moneda, zona horaria
+  * Idiomas: idioma principal, idiomas secundarios
+  * Pagos: conectar Stripe (input API key), conectar MercadoPago, conectar PayPal, métodos manuales
+  * Envíos y entrega: zonas de envío, tarifas, envío gratis desde monto X
+  * Usuarios y permisos: tabla de usuarios con rol, botón agregar usuario, roles: Admin/Staff/Bodega
+  * Seguridad: cambiar contraseña, autenticación 2 factores
+  * Notificaciones: toggles para email de nuevo pedido, pedido enviado, stock bajo, nuevo cliente
+- Cada sección con botón Guardar cambios
+- Conectado a Supabase tablas correspondientes
 
-=== MODULO DESCUENTOS ===
-Archivo: /src/app/(admin)/descuentos/page.tsx
-- Tabla: Código, Tipo, Valor, Usos, Estado, Fechas
-- Botón "Crear descuento" abre modal con:
-  * Código (o generar automático)
-  * Tipo: Porcentaje o Monto fijo
-  * Valor
-  * Fecha inicio y fin
-  * Límite de usos
-- Por fila: Editar y Eliminar
-- Conectado a Supabase tabla descuentos
+Requisitos:
+- Instalar recharts: npm install recharts
+- Layout idéntico a Shopify
+- TypeScript sin errores
+- Datos de ejemplo realistas
+- Iconos lucide-react
 
-=== MODULO MARKETING ===
-Archivo: /src/app/(admin)/marketing/page.tsx
-- Cards superiores: Email Marketing, Redes Sociales, Anuncios
-- Cada card con botón Configurar que abre modal de configuración
-- Botón "Crear campaña" abre modal: nombre, tipo, fechas, presupuesto
-- Tabla de campañas: Nombre, Tipo, Estado, Alcance, Conversión, acciones Editar/Eliminar
-
-Requisitos para todos los módulos:
-- Layout idéntico a Shopify: sidebar oscuro + topbar + fondo gris
-- Modales funcionales con formularios completos
-- Iconos de lucide-react
-- TypeScript estricto sin errores
-- Datos de ejemplo en cada módulo
-
-Genera los 4 archivos completos.
+Genera los 2 archivos completos.

@@ -1,6 +1,12 @@
+'use client'
+
 import Link from 'next/link'
+import { useActionState } from 'react'
+import { login } from './actions'
 
 export default function LoginPage() {
+  const [state, action, pending] = useActionState(login, null)
+
   return (
     <div className="min-h-screen bg-[#f1f1f1] flex items-center justify-center p-4">
       <div className="w-full max-w-sm">
@@ -15,16 +21,18 @@ export default function LoginPage() {
 
         {/* Card */}
         <div className="rounded-2xl border border-[#e1e1e1] bg-white p-8 shadow-sm">
-          <form className="space-y-4">
+          <form action={action} className="space-y-4">
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-[#1a1a1a] mb-1.5">
                 Correo electrónico
               </label>
               <input
                 id="email"
+                name="email"
                 type="email"
                 autoComplete="email"
                 placeholder="tu@correo.com"
+                required
                 className="w-full rounded-lg border border-[#e1e1e1] px-3.5 py-2.5 text-sm text-[#1a1a1a] placeholder-[#9a9a9a] outline-none focus:border-[#1a1a1a] focus:ring-2 focus:ring-[#1a1a1a]/10 transition-all"
               />
             </div>
@@ -40,18 +48,27 @@ export default function LoginPage() {
               </div>
               <input
                 id="password"
+                name="password"
                 type="password"
                 autoComplete="current-password"
                 placeholder="••••••••"
+                required
                 className="w-full rounded-lg border border-[#e1e1e1] px-3.5 py-2.5 text-sm text-[#1a1a1a] placeholder-[#9a9a9a] outline-none focus:border-[#1a1a1a] focus:ring-2 focus:ring-[#1a1a1a]/10 transition-all"
               />
             </div>
 
+            {state?.error && (
+              <div className="rounded-lg bg-[#fff5f5] border border-[#fecaca] px-3.5 py-2.5">
+                <p className="text-sm text-[#b91c1c]">{state.error}</p>
+              </div>
+            )}
+
             <button
               type="submit"
-              className="w-full rounded-lg bg-[#1a1a1a] py-2.5 text-sm font-semibold text-white hover:bg-[#2a2a2a] active:bg-[#0a0a0a] transition-colors"
+              disabled={pending}
+              className="w-full rounded-lg bg-[#1a1a1a] py-2.5 text-sm font-semibold text-white hover:bg-[#2a2a2a] active:bg-[#0a0a0a] disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
             >
-              Iniciar sesión
+              {pending ? 'Iniciando sesión...' : 'Iniciar sesión'}
             </button>
           </form>
 

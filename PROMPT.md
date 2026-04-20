@@ -1,42 +1,49 @@
 Eres el desarrollador de OftalShop, clon de Shopify para ópticas.
 Stack: Next.js 14, TypeScript, Tailwind CSS, Supabase.
 
-MODULO: PRODUCTOS COMPLETO
+Crea estos 4 modulos completos:
 
-Archivos a crear:
+=== MODULO CLIENTES ===
+Archivo: /src/app/(admin)/clientes/page.tsx
+- Tabla: checkbox, Nombre, Email, Pedidos, Total gastado, Ubicación, Fecha registro
+- Botón "Agregar cliente" abre modal con campos: nombre, email, teléfono, dirección
+- Por fila: Editar y Eliminar con confirmación
+- Búsqueda de clientes
+- 5 clientes de ejemplo
+- Conectado a Supabase tabla clientes_tienda
 
-1. /src/app/(admin)/productos/page.tsx
-- Layout Shopify: sidebar + topbar + contenido gris
-- Tabs: Todos, Activos, Borrador, Archivados
-- Tabla con checkbox, Imagen, Título, Estado badge, Inventario, Tipo, Proveedor, Precio
-- Botón "Agregar producto" que navega a /admin/productos/nuevo
-- Opción por fila: Editar, Eliminar con confirmación
-- Búsqueda de productos
-- Datos de ejemplo con 5 productos
+=== MODULO CONTENIDO ===
+Archivo: /src/app/(admin)/contenido/page.tsx
+- Secciones: Páginas, Blog, Archivos, Menú de navegación
+- Botones: Agregar página, Crear artículo, Subir archivo, Editar menú
+- Tabla de páginas con: Título, Visibilidad, Fecha, acciones Editar/Eliminar
+- Modal crear página: título, contenido rich text, visibilidad
+- Modal crear artículo: título, contenido, imagen destacada
 
-2. /src/app/(admin)/productos/nuevo/page.tsx
-- IDENTICO a Shopify agregar producto:
-- Topbar: "Producto no guardado" + botones Descartar y Guardar
-- Columna izquierda (70%):
-  * Título (input)
-  * Descripción (editor rich text con TipTap: negrita, cursiva, listas, links, imágenes)
-  * Multimedia: zona drag and drop para subir imágenes y videos a Supabase Storage
-  * Precio / Precio comparado / Costo por artículo / Margen (calculado automático)
-  * Inventario: SKU, Código de barras, Track quantity checkbox, Stock
-  * Envío: requiere envío checkbox, Peso
-  * Variantes: agregar opciones como Talla, Color con valores
-  * SECCION OPTICA ESPECIAL:
-    - Materiales de luna: lista con botón "Agregar material"
-    - Tratamientos: lista dinámica con botón "Agregar tratamiento"
-    - Medidas: opción Manual (tabla de valores) o Foto (subir imagen)
-- Columna derecha (30%):
-  * Estado: Activo / Borrador / Archivado
-  * Canales de venta: Tienda online checkbox
-  * Organización: Tipo de producto, Proveedor, Colecciones, Tags
-  * Plantilla de tema: selector
-- Todo conectado a Supabase tablas: productos, variantes, medias, materiales_luna, tratamientos, medidas_producto
+=== MODULO DESCUENTOS ===
+Archivo: /src/app/(admin)/descuentos/page.tsx
+- Tabla: Código, Tipo, Valor, Usos, Estado, Fechas
+- Botón "Crear descuento" abre modal con:
+  * Código (o generar automático)
+  * Tipo: Porcentaje o Monto fijo
+  * Valor
+  * Fecha inicio y fin
+  * Límite de usos
+- Por fila: Editar y Eliminar
+- Conectado a Supabase tabla descuentos
 
-3. /src/app/(admin)/productos/[id]/page.tsx
-- Igual que nuevo pero carga datos existentes para editar
+=== MODULO MARKETING ===
+Archivo: /src/app/(admin)/marketing/page.tsx
+- Cards superiores: Email Marketing, Redes Sociales, Anuncios
+- Cada card con botón Configurar que abre modal de configuración
+- Botón "Crear campaña" abre modal: nombre, tipo, fechas, presupuesto
+- Tabla de campañas: Nombre, Tipo, Estado, Alcance, Conversión, acciones Editar/Eliminar
 
-Genera los 3 archivos completos listos para usar.
+Requisitos para todos los módulos:
+- Layout idéntico a Shopify: sidebar oscuro + topbar + fondo gris
+- Modales funcionales con formularios completos
+- Iconos de lucide-react
+- TypeScript estricto sin errores
+- Datos de ejemplo en cada módulo
+
+Genera los 4 archivos completos.

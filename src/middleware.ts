@@ -60,6 +60,11 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(loginUrl)
   }
 
+  // Attach tenant_id header for downstream use
+  if (user) {
+    response.headers.set('x-tenant-id', user.id)
+  }
+
   return response
 }
 

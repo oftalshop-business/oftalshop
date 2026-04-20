@@ -1,9 +1,10 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 import {
   Plus, Search, Filter, MoreHorizontal, Pencil, Trash2,
-  Users, ShoppingBag, TrendingUp, X, ChevronDown,
+  Users, ShoppingBag, TrendingUp, X, ChevronDown, ChevronRight,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 
@@ -271,23 +272,31 @@ export default function ClientesPage() {
                   <td className="px-4 py-3 text-sm text-[#6a6a6a]">{c.ciudad ?? '—'}</td>
                   <td className="px-4 py-3 text-sm text-[#6a6a6a]">{fmt(c.created_at)}</td>
                   <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
-                    <div className="relative">
-                      <button
-                        onClick={() => setOpenMenu(openMenu === c.id ? null : c.id)}
-                        className="flex h-7 w-7 items-center justify-center rounded-md text-[#6a6a6a] hover:bg-[#f1f1f1] transition-colors"
+                    <div className="flex items-center gap-2 justify-end">
+                      <Link
+                        href={`/clientes/${c.id}`}
+                        className="flex items-center gap-1 rounded-lg border border-[#e1e1e1] px-2.5 py-1.5 text-xs font-medium text-[#1a1a1a] hover:bg-[#f7f7f7] transition-colors"
                       >
-                        <MoreHorizontal className="h-4 w-4" />
-                      </button>
-                      {openMenu === c.id && (
-                        <div className="absolute right-0 top-8 z-10 w-36 rounded-lg border border-[#e1e1e1] bg-white py-1 shadow-md">
-                          <button onClick={() => openEdit(c)} className="flex w-full items-center gap-2 px-3 py-2 text-sm text-[#1a1a1a] hover:bg-[#f7f7f7]">
-                            <Pencil className="h-3.5 w-3.5" /> Editar
-                          </button>
-                          <button onClick={() => handleDelete(c.id)} className="flex w-full items-center gap-2 px-3 py-2 text-sm text-[#b91c1c] hover:bg-[#f7f7f7]">
-                            <Trash2 className="h-3.5 w-3.5" /> Eliminar
-                          </button>
-                        </div>
-                      )}
+                        Ver más <ChevronRight className="h-3 w-3" />
+                      </Link>
+                      <div className="relative">
+                        <button
+                          onClick={() => setOpenMenu(openMenu === c.id ? null : c.id)}
+                          className="flex h-7 w-7 items-center justify-center rounded-md text-[#6a6a6a] hover:bg-[#f1f1f1] transition-colors"
+                        >
+                          <MoreHorizontal className="h-4 w-4" />
+                        </button>
+                        {openMenu === c.id && (
+                          <div className="absolute right-0 top-8 z-10 w-36 rounded-lg border border-[#e1e1e1] bg-white py-1 shadow-md">
+                            <button onClick={() => openEdit(c)} className="flex w-full items-center gap-2 px-3 py-2 text-sm text-[#1a1a1a] hover:bg-[#f7f7f7]">
+                              <Pencil className="h-3.5 w-3.5" /> Editar
+                            </button>
+                            <button onClick={() => handleDelete(c.id)} className="flex w-full items-center gap-2 px-3 py-2 text-sm text-[#b91c1c] hover:bg-[#f7f7f7]">
+                              <Trash2 className="h-3.5 w-3.5" /> Eliminar
+                            </button>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </td>
                 </tr>

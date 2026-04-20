@@ -1,115 +1,63 @@
 Eres el desarrollador de OftalShop, clon de Shopify para ópticas.
-Stack: Next.js 14, TypeScript, Tailwind CSS, Supabase Auth.
+Stack: Next.js 14, TypeScript, Tailwind CSS, Supabase.
 
-Crea el sistema completo de autenticacion y landing page:
+TAREA: Módulo clientes completo con perfil y historia clínica.
 
-=== ARCHIVO 1: /src/app/page.tsx ===
-Landing page profesional de OftalShop SaaS:
+=== ARCHIVO 1: /src/app/(admin)/clientes/page.tsx ===
+Lista de clientes actualizada:
+- Misma tabla de antes pero con botón "Ver más" por fila
+- "Ver más" navega a /admin/clientes/[id]
 
-HERO SECTION:
-- Fondo gradiente azul oscuro a negro
-- Logo OftalShop arriba izquierda
-- Navegacion: Caracteristicas, Precios, Testimonios, Iniciar sesion, Empezar gratis
-- Titulo grande: "El Shopify para ópticas y clínicas oftalmológicas"
-- Subtitulo: "Crea tu tienda online, gestiona pedidos, inventario y clientes. Todo en un solo lugar."
-- Dos botones CTA: "Empezar gratis 14 días" (verde) y "Ver demo" (outline blanco)
-- Imagen/mockup del dashboard a la derecha
+=== ARCHIVO 2: /src/app/(admin)/clientes/[id]/page.tsx ===
+Página perfil del cliente con diseño oscuro como las imágenes:
+- Header superior: avatar con inicial, nombre completo, DNI, teléfono, total compras
+- 3 tabs: Datos / Historia / Compras
 
-SECCION CARACTERISTICAS:
-- Titulo: "Todo lo que necesita tu óptica"
-- 6 cards con icono, titulo y descripcion:
-  * Tienda online profesional
-  * Gestión de productos ópticos (materiales, tratamientos, medidas)
-  * Pedidos y clientes
-  * Múltiples pasarelas de pago
-  * Editor visual de tienda
-  * Informes y estadísticas
+TAB DATOS - campos editables:
+- Nombres, Apellidos, DNI, Teléfono, Email, Ciudad, Dirección
+- Botón Guardar cambios
+- Conectado a Supabase tabla clientes_tienda
 
-SECCION PARA QUIEN ES:
-- Titulo: "Diseñado para negocios ópticos"
-- 5 cards: Ópticas, Clínicas oftalmológicas, Laboratorios ópticos, E-commerce de lentes, Distribuidoras
-- Cada card con icono y descripcion corta
+TAB HISTORIA - igual a las imágenes adjuntas:
+Sección "Información general":
+- Doctor/Optómetra (select), Texto libre (toggle), Fecha, Tipo de prescripción
 
-SECCION PRECIOS:
-- Titulo: "Planes simples y transparentes"
-- 3 cards de planes:
-  * Básico $19/mes: 50 productos, 1 pasarela pago, 3 plantillas gratis, soporte email
-  * Intermedio $49/mes (badge POPULAR): 300 productos, 3 pasarelas, dominio propio, editor visual
-  * Pro $99/mes: ilimitado todo, multi-usuario, white label, soporte WhatsApp
-- Cada plan con botón "Empezar ahora"
-- Toggle mensual/anual con 20% descuento anual
+Sección "Visión de Lejos" (tabla):
+- Columnas: Esférico, Cilindro, Eje, A.V C/c, DIP, Altura, Adición
+- Filas: Ojo Derecho, Ojo Izquierdo
 
-SECCION TESTIMONIOS:
-- 3 testimonios con foto avatar, nombre, tipo de negocio, estrellas y comentario
-- Ejemplos: óptica Lima, clínica oftalmológica, laboratorio óptico
+Sección "Visión de Cerca" (tabla):
+- Columnas: Esférico, Cilindro, Eje, A.V C/c, DIP, Altura
+- Filas: Ojo Derecho, Ojo Izquierdo
 
-SECCION CTA FINAL:
-- Fondo azul
-- "¿Listo para digitalizar tu negocio óptico?"
-- Botón grande "Empezar gratis 14 días"
+Sección "Visión Intermedia" (tabla):
+- Columnas: Esférico, Cilindro, Eje, A.V C/c, DIP, Altura
+- Filas: Ojo Derecho, Ojo Izquierdo
 
-FOOTER:
-- Logo + descripcion corta
-- Links: Producto, Empresa, Soporte, Legal
-- Redes sociales
-- Copyright OftalShop 2025
+Sección "Historia clínica":
+- Campos textarea: Razón de la consulta, Sintomatología, 
+  Diagnóstico, Tratamiento, Historia ocular, 
+  Historial familiar ocular, Comentarios
 
-Diseño: profesional, moderno, colores azul #1e40af y blanco,
-tipografia limpia, animaciones suaves, totalmente responsive.
+Sección "Antecedentes":
+- Badges seleccionables (toggle activo/inactivo):
+  Catarata, Glaucoma, Traumatismo ocular, 
+  Hipertensión, Diabetes mellitus, Otro
 
-=== ARCHIVO 2: /src/app/login/page.tsx ===
-Pagina de login:
-- Fondo gris claro
-- Card centrada blanca con sombra
-- Logo OftalShop arriba
-- Titulo: "Iniciar sesión"
-- Input: Email
-- Input: Contraseña (con toggle mostrar/ocultar)
-- Botón: "Iniciar sesión" (azul, full width)
-- Link: "¿Olvidaste tu contraseña?"
-- Separador "o"
-- Link: "¿No tienes cuenta? Empezar gratis"
-- Conectado a Supabase Auth con signInWithPassword
-- Si login exitoso: redirect a /dashboard
-- Mostrar errores si credenciales incorrectas
+Botón grande azul: "Guardar historia clínica"
+- Conectado a Supabase nueva tabla historias_clinicas con tenant_id y cliente_id
 
-=== ARCHIVO 3: /src/app/registro/page.tsx ===
-Pagina de registro:
-- Card centrada igual que login
-- Campos: Nombre completo, Email, Contraseña, Confirmar contraseña
-- Selector de plan: Básico / Intermedio / Pro
-- Nombre de la tienda (genera el slug automático)
-- Checkbox: acepto términos y condiciones
-- Botón: "Crear cuenta gratis"
-- Conectado a Supabase Auth con signUp
-- Al registrar: crear registro en tabla tenants con los datos
-- Redirect a /dashboard tras registro exitoso
+TAB COMPRAS:
+- Tabla de pedidos del cliente: #pedido, fecha, productos, total, estado
+- Conectado a Supabase tabla pedidos filtrado por cliente_id y tenant_id
 
-=== ARCHIVO 4: /src/app/recuperar/page.tsx ===
-Recuperar contraseña:
-- Card centrada
-- Input email
-- Botón enviar enlace
-- Conectado a Supabase Auth resetPasswordForEmail
-- Mensaje de confirmación tras enviar
+Diseño: fondo oscuro #0f1117 igual a las imágenes, 
+texto blanco, inputs con fondo #1e2130, 
+secciones con fondo #161b2e y borde sutil.
 
-=== ARCHIVO 5: /src/middleware.ts ===
-Middleware de autenticacion completo:
-- Rutas protegidas: todo /dashboard y /(admin)/* requiere sesion activa
-- Si no hay sesion: redirect a /login
-- Si hay sesion y visita /login: redirect a /dashboard
-- Rutas publicas: /, /login, /registro, /recuperar, /[tenant]/*
-
-=== ARCHIVO 6: /src/lib/supabase/client.ts ===
-=== ARCHIVO 7: /src/lib/supabase/server.ts ===
-Clientes Supabase actualizados y correctos para Next.js 16.
-
-Requisitos:
-- TypeScript sin errores
-- Supabase Auth completamente funcional
-- Manejo de errores en todos los formularios
-- Loading states en botones
-- Responsive en mobile
-- Iconos lucide-react
+=== ARCHIVO 3: Migration SQL ===
+Genera el SQL para ejecutar en Supabase:
+CREATE TABLE historias_clinicas con todos los campos necesarios
+incluyendo tenant_id, cliente_id, y todos los campos de la historia.
 
 Genera todos los archivos completos.
